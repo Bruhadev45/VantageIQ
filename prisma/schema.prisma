@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model MarketSource {
+  id        String   @id
+  title     String
+  publisher String
+  url       String
+  date      String
+  notes     String
+  createdAt DateTime @default(now())
+}
+
+model Competitor {
+  id             String   @id
+  name           String
+  category       String
+  marketShare    Float
+  growth         Float
+  sentiment      Float
+  engagement     Float
+  revenueInrCr   Float?
+  cities         Int?
+  stores         Int?
+  pricing        String
+  moat           String
+  fastestChannel String
+  risk           String
+  insight        String
+  sourceId       String
+  createdAt      DateTime @default(now())
+}
+
+model TrendSignal {
+  id              String   @id
+  period          String
+  quickCommerce   Float
+  premiumProducts Float
+  festiveDemand   Float
+  loyalty         Float
+  sourceId        String
+  createdAt       DateTime @default(now())
+}
+
+model CampaignPattern {
+  id          String   @id
+  brand       String
+  name        String
+  channel     String
+  lift        String
+  spend       String
+  pattern     String
+  whyItWorked String
+  sourceId    String
+  createdAt   DateTime @default(now())
+}
+
+model Recommendation {
+  id         String   @id
+  title      String
+  impact     Int
+  confidence Int
+  motion     String
+  action     String
+  createdAt  DateTime @default(now())
+}
