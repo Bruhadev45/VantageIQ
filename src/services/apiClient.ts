@@ -1,39 +1,62 @@
-import type { AgentRunResult, MarketDatasetResponse, MarketRequest } from "../shared/contracts";
+import type {
+  AgentRunResult,
+  MarketDatasetResponse,
+  MarketRequest,
+  RunDetail,
+  RunSummary,
+} from "../shared/contracts";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8787";
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8787";
 
-export async function runAgents(request: MarketRequest): Promise<AgentRunResult> {
-  const response = await fetch(`${API_BASE_URL}/api/intelligence/agents/run`, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-    },
-    body: JSON.stringify(request),
-  });
-
+async function jsonOrThrow<T>(response: Response, context: string): Promise<T> {
   if (!response.ok) {
-    throw new Error(`Agent run failed with status ${response.status}`);
+    throw new Error(`${context} failed with status ${response.status}`);
   }
-
-  return response.json() as Promise<AgentRunResult>;
+  return response.json() as Promise<T>;
 }
 
-export async function getApiHealth(): Promise<{ ok: boolean; openaiConfigured: boolean }> {
-  const response = await fetch(`${API_BASE_URL}/api/health`);
-
-  if (!response.ok) {
-    throw new Error(`API health check failed with status ${response.status}`);
-  }
-
-  return response.json() as Promise<{ ok: boolean; openaiConfigured: boolean }>;
+export async function getApiHealth(): Promise<{ ok: boolean; service: string; openaiConfigured: boolean }> {
+  return jsonOrThrow(await fetch(`${API_BASE_URL}/api/health`), "Health check");
 }
 
 export async function getMarketDataset(): Promise<MarketDatasetResponse> {
-  const response = await fetch(`${API_BASE_URL}/api/intelligence/dataset`);
+  return jsonOrThrow(await fetch(`${API_BASE_URL}/api/intelligence/dataset`), "Dataset request");
+}
 
-  if (!response.ok) {
-    throw new Error(`Dataset request failed with status ${response.status}`);
-  }
+export async function runAgents(request: MarketRequest): Promise<AgentRunResult> {
+  return jsonOrThrow(
+    await fetch(`${API_BASE_URL}/api/intelligence/agents/run`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(request),
+    }),
+    "Agent run",
+  );
+}
 
-  return response.json() as Promise<MarketDatasetResponse>;
+export async function createRun(request: MarketRequest): Promise<RunDetail> {
+  return jsonOrThrow(
+    await fetch(`${API_BASE_URL}/api/runs`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(request),
+    }),
+    "Run creation",
+  );
+}
+
+export async function listRuns(): Promise<RunSummary[]> {
+  const { runs } = await jsonOrThrow<{ runs: RunSummary[] }>(
+    await fetch(`${API_BASE_URL}/api/runs`),
+    "Runs list",
+  );
+  return runs;
+}
+
+export async function getRunById(id: string): Promise<RunDetail> {
+  return jsonOrThrow(await fetch(`${API_BASE_URL}/api/runs/${id}`), "Run detail");
+}
+
+export function streamRunUrl(id: string): string {
+  return `${API_BASE_URL}/api/runs/${id}/stream`;
 }

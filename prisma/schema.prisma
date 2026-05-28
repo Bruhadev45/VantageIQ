@@ -70,3 +70,22 @@ model Recommendation {
   action     String
   createdAt  DateTime @default(now())
 }
+
+model Run {
+  id               String    @id @default(cuid())
+  status           String    @default("pending")
+  mode             String    @default("demo")
+  market           String
+  company          String
+  competitorsJson  Json      @default("[]")
+  executiveSummary String?
+  insightsJson     Json?
+  playsJson        Json?
+  costUsd          Float?
+  error            String?
+  startedAt        DateTime  @default(now())
+  completedAt      DateTime?
+  createdAt        DateTime  @default(now())
+
+  @@index([createdAt(sort: Desc)])
+}
