@@ -5,6 +5,7 @@
 > Transform competitor signals into actionable growth strategies in minutes, not weeks.
 
 ![VantageIQ Dashboard](https://img.shields.io/badge/Status-Hackathon_MVP-lime?style=for-the-badge)
+![Built with Codex](https://img.shields.io/badge/Built_with-Codex_Code-blueviolet?style=for-the-badge&logo=anthropic)
 ![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript)
 ![OpenAI](https://img.shields.io/badge/OpenAI-Agents_SDK-412991?style=flat-square&logo=openai)
@@ -181,6 +182,8 @@ curl -N "http://127.0.0.1:8787/api/runs/$RUN_ID/stream"
 ## 👥 Team
 
 Built for **Hackathon 2026**
+
+**100% built with [Codex](https://claude.ai/claude-code)** — from architecture to implementation, all code was generated via AI-assisted development.
 
 ---
 
