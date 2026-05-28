@@ -3,10 +3,21 @@ import { z } from "zod";
 export const MarketRequestSchema = z.object({
   market: z.string().min(2).max(120).default("India quick commerce"),
   company: z.string().min(2).max(120).default("Your company"),
+  region: z.string().min(2).max(120).default("India"),
+  objective: z.string().min(2).max(180).default("Find growth opportunities and campaign ideas"),
+  horizon: z.string().min(2).max(80).default("30 days"),
   competitors: z.array(z.string().min(2).max(120)).max(8).default([]),
 });
 
 export type MarketRequest = z.infer<typeof MarketRequestSchema>;
+
+export const SourceIngestionSchema = z.object({
+  url: z.string().url(),
+  market: z.string().min(2).max(120).default("India quick commerce"),
+  competitor: z.string().max(120).optional(),
+});
+
+export type SourceIngestionRequest = z.infer<typeof SourceIngestionSchema>;
 
 export type AgentName = "Research" | "Trend" | "Campaign" | "Strategy";
 
@@ -34,11 +45,23 @@ export type AgentRunResult = {
 };
 
 export type MarketSourceSummary = {
+  id?: string;
   title: string;
   publisher: string;
   url: string;
   date: string;
   notes: string;
+};
+
+export type SourceIngestionResult = {
+  source: MarketSourceSummary;
+  extractedSignals: string[];
+};
+
+export type LiveResearchResult = {
+  query: string;
+  providers: string[];
+  sources: SourceIngestionResult[];
 };
 
 export type MarketDatasetResponse = {
@@ -103,6 +126,9 @@ export type RunSummary = {
   mode: "live-openai" | "demo";
   market: string;
   company: string;
+  region: string;
+  objective: string;
+  horizon: string;
   competitors: string[];
   executiveSummary: string | null;
   startedAt: string;

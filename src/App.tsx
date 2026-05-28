@@ -6,7 +6,7 @@ function App() {
   return (
     <ErrorBoundary>
       <DashboardPage />
-      <Toaster position="top-right" richColors theme="dark" />
+      <Toaster position="top-right" richColors theme="light" />
     </ErrorBoundary>
   );
 }

@@ -16,7 +16,7 @@ import { prisma } from "./client";
 export async function getMarketDataset(): Promise<MarketDatasetResponse> {
   const [competitors, trends, campaigns, recommendations, sources] = await Promise.all([
     prisma.competitor.findMany({ orderBy: { marketShare: "desc" } }),
-    prisma.trendSignal.findMany({ orderBy: { period: "asc" } }),
+    prisma.trendSignal.findMany(),
     prisma.campaignPattern.findMany(),
     prisma.recommendation.findMany({ orderBy: { impact: "desc" } }),
     prisma.marketSource.findMany({ orderBy: { date: "desc" } }),
@@ -25,13 +25,22 @@ export async function getMarketDataset(): Promise<MarketDatasetResponse> {
   return {
     sources: sources.map(toSourceSummary),
     competitors: competitors.map(toCompetitor),
-    trends: trends.map(toTrendPoint),
+    trends: trends
+      .map(toTrendPoint)
+      .sort((a, b) => monthOrder(a.period) - monthOrder(b.period)),
     campaigns: campaigns.map(toCampaign),
     recommendations: recommendations.map(toRecommendation),
   };
 }
 
+function monthOrder(period: string) {
+  const order = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const index = order.indexOf(period);
+  return index === -1 ? Number.MAX_SAFE_INTEGER : index;
+}
+
 function toSourceSummary(row: {
+  id?: string;
   title: string;
   publisher: string;
   url: string;
@@ -39,6 +48,7 @@ function toSourceSummary(row: {
   notes: string;
 }): MarketSourceSummary {
   return {
+    id: row.id,
     title: row.title,
     publisher: row.publisher,
     url: row.url,
@@ -145,6 +155,9 @@ type RunRow = {
   mode: string;
   market: string;
   company: string;
+  region: string;
+  objective: string;
+  horizon: string;
   competitorsJson: unknown;
   executiveSummary: string | null;
   insightsJson: unknown;
@@ -196,6 +209,9 @@ function toRunSummary(row: RunRow): RunSummary {
     mode: row.mode === "live-openai" ? "live-openai" : "demo",
     market: row.market,
     company: row.company,
+    region: row.region,
+    objective: row.objective,
+    horizon: row.horizon,
     competitors: parseStringArray(row.competitorsJson),
     executiveSummary: row.executiveSummary,
     startedAt: row.startedAt.toISOString(),
@@ -216,12 +232,18 @@ function toRunDetail(row: RunRow): RunDetail {
 export async function createRun(input: {
   market: string;
   company: string;
+  region: string;
+  objective: string;
+  horizon: string;
   competitors: string[];
 }): Promise<RunDetail> {
   const row = await prisma.run.create({
     data: {
       market: input.market,
       company: input.company,
+      region: input.region,
+      objective: input.objective,
+      horizon: input.horizon,
       competitorsJson: input.competitors,
       status: "pending",
     },

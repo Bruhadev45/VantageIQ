@@ -17,19 +17,19 @@ export function MomentumForecast({ trends }: Props) {
       <div className="chart-frame small">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={trends}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" vertical={false} />
-            <XAxis dataKey="period" axisLine={false} tickLine={false} tick={{ fill: '#71717a' }} />
-            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#71717a' }} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" vertical={false} />
+            <XAxis dataKey="period" axisLine={false} tickLine={false} tick={{ fill: '#6b6b7b', fontSize: 11 }} />
+            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6b6b7b', fontSize: 11 }} />
             <Tooltip />
             <Line
               type="monotone"
               dataKey="quickCommerce"
               name="Quick commerce"
-              stroke="#10b981"
+              stroke="#166534"
               strokeWidth={2}
               dot={false}
             />
-            <Line type="monotone" dataKey="loyalty" name="Loyalty" stroke="#14b8a6" strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="loyalty" name="Loyalty" stroke="#1a1a2e" strokeWidth={2} dot={false} />
           </LineChart>
         </ResponsiveContainer>
       </div>

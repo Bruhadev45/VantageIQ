@@ -23,23 +23,23 @@ export function TrendRadar({ trends, onViewDrivers }: Props) {
           <AreaChart data={trends}>
             <defs>
               <linearGradient id="quickCommerce" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#10b981" stopOpacity={0.4} />
-                <stop offset="95%" stopColor="#10b981" stopOpacity={0.05} />
+                <stop offset="5%" stopColor="#166534" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#166534" stopOpacity={0.02} />
               </linearGradient>
               <linearGradient id="premiumProducts" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor="#14b8a6" stopOpacity={0.35} />
-                <stop offset="95%" stopColor="#14b8a6" stopOpacity={0.05} />
+                <stop offset="5%" stopColor="#C5FFD6" stopOpacity={0.6} />
+                <stop offset="95%" stopColor="#C5FFD6" stopOpacity={0.1} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.08)" vertical={false} />
-            <XAxis dataKey="period" axisLine={false} tickLine={false} tick={{ fill: '#71717a' }} />
-            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#71717a' }} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" vertical={false} />
+            <XAxis dataKey="period" axisLine={false} tickLine={false} tick={{ fill: '#6b6b7b', fontSize: 11 }} />
+            <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6b6b7b', fontSize: 11 }} />
             <Tooltip />
             <Area
               type="monotone"
               dataKey="quickCommerce"
               name="Quick commerce"
-              stroke="#10b981"
+              stroke="#166534"
               fill="url(#quickCommerce)"
               strokeWidth={2}
             />
@@ -47,7 +47,7 @@ export function TrendRadar({ trends, onViewDrivers }: Props) {
               type="monotone"
               dataKey="premiumProducts"
               name="Premium products"
-              stroke="#14b8a6"
+              stroke="#059669"
               fill="url(#premiumProducts)"
               strokeWidth={2}
             />

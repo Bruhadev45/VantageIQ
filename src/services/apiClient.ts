@@ -2,8 +2,11 @@ import type {
   AgentRunResult,
   MarketDatasetResponse,
   MarketRequest,
+  LiveResearchResult,
   RunDetail,
   RunSummary,
+  SourceIngestionRequest,
+  SourceIngestionResult,
 } from "../shared/contracts";
 
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8787";
@@ -55,6 +58,28 @@ export async function listRuns(): Promise<RunSummary[]> {
 
 export async function getRunById(id: string): Promise<RunDetail> {
   return jsonOrThrow(await fetch(`${API_BASE_URL}/api/runs/${id}`), "Run detail");
+}
+
+export async function ingestSource(request: SourceIngestionRequest): Promise<SourceIngestionResult> {
+  return jsonOrThrow(
+    await fetch(`${API_BASE_URL}/api/intelligence/sources/ingest`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(request),
+    }),
+    "Source ingestion",
+  );
+}
+
+export async function runLiveResearch(request: MarketRequest): Promise<LiveResearchResult> {
+  return jsonOrThrow(
+    await fetch(`${API_BASE_URL}/api/intelligence/research/live`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(request),
+    }),
+    "Live research",
+  );
 }
 
 export function streamRunUrl(id: string): string {

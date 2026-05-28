@@ -9,7 +9,7 @@ export async function runResearchAgent(request: MarketRequest): Promise<AgentIns
   return {
     agent: "Research",
     confidence: 87,
-    finding: `${fastest.name} is the immediate benchmark in ${request.market}; compare ${request.company} against ${namedCompetitors} on switching friction, proof assets, and buyer-specific messaging.`,
+    finding: `${fastest.name} is the immediate benchmark in ${request.market}; compare ${request.company} against ${namedCompetitors} on ${request.objective.toLowerCase()} for ${request.region} over the next ${request.horizon}.`,
     evidence: [
       `${fastest.name} shows ${fastest.growth}% growth in the seeded India quick-commerce dataset.`,
       `Strongest channel: ${fastest.fastestChannel}.`,

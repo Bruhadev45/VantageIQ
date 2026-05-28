@@ -11,7 +11,7 @@ model MarketSource {
   id        String   @id
   title     String
   publisher String
-  url       String
+  url       String   @unique
   date      String
   notes     String
   createdAt DateTime @default(now())
@@ -77,6 +77,9 @@ model Run {
   mode             String    @default("demo")
   market           String
   company          String
+  region           String    @default("India")
+  objective        String    @default("Find growth opportunities and campaign ideas")
+  horizon          String    @default("30 days")
   competitorsJson  Json      @default("[]")
   executiveSummary String?
   insightsJson     Json?

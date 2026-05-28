@@ -23,10 +23,10 @@ export function PostureRadar({ competitors }: Props) {
       <div className="radar-frame">
         <ResponsiveContainer width="100%" height="100%">
           <RadarChart data={data}>
-            <PolarGrid stroke="rgba(255,255,255,0.08)" />
-            <PolarAngleAxis dataKey="company" tick={{ fontSize: 11, fill: '#71717a' }} />
-            <Radar dataKey="Sentiment" stroke="#10b981" fill="#10b981" fillOpacity={0.25} />
-            <Radar dataKey="Engagement" stroke="#14b8a6" fill="#14b8a6" fillOpacity={0.2} />
+            <PolarGrid stroke="#e5e5e5" />
+            <PolarAngleAxis dataKey="company" tick={{ fontSize: 11, fill: '#6b6b7b' }} />
+            <Radar dataKey="Sentiment" stroke="#166534" fill="#C5FFD6" fillOpacity={0.5} />
+            <Radar dataKey="Engagement" stroke="#1a1a2e" fill="#ECFFA3" fillOpacity={0.4} />
             <Legend />
           </RadarChart>
         </ResponsiveContainer>

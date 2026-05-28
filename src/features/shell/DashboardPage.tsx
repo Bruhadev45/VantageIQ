@@ -5,6 +5,7 @@ import { ErrorBoundary } from "../../components/ErrorBoundary";
 import { useDataset } from "../../hooks/useDataset";
 import { useRunHistory } from "../../hooks/useRunHistory";
 import { useRunStream } from "../../hooks/useRunStream";
+import { ingestSource, runLiveResearch } from "../../services/apiClient";
 import { generateMarketBrief } from "../../services/intelligenceEngine";
 import { CampaignLab } from "../campaigns/CampaignLab";
 import { ChannelMix } from "../campaigns/ChannelMix";
@@ -13,8 +14,11 @@ import { HeroPanel } from "../command-center/HeroPanel";
 import { MetricsGrid } from "../command-center/MetricsGrid";
 import { TrendRadar } from "../command-center/TrendRadar";
 import { CompetitorMonitor } from "../competitors/CompetitorMonitor";
+import { CounterStrategyMatrix } from "../competitors/CounterStrategyMatrix";
 import { PostureRadar } from "../competitors/PostureRadar";
 import { EvidenceLayer } from "../evidence/EvidenceLayer";
+import { MissionBuilder } from "../mission/MissionBuilder";
+import { BoardMemo } from "../strategy/BoardMemo";
 import { ExecutiveNarrative } from "../strategy/ExecutiveNarrative";
 import { StrategyRoom } from "../strategy/StrategyRoom";
 import { MomentumForecast } from "../trends/MomentumForecast";
@@ -22,7 +26,7 @@ import { Sidebar, type SidebarView } from "./Sidebar";
 import { Topbar } from "./Topbar";
 
 export function DashboardPage() {
-  const { dataset, status, loading, error } = useDataset();
+  const { dataset, status, loading, error, refresh } = useDataset();
   const stream = useRunStream();
   const { runs, refresh: refreshRuns } = useRunHistory(stream.state.status);
 
@@ -30,6 +34,16 @@ export function DashboardPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [extraCompetitors, setExtraCompetitors] = useState<string[]>([]);
+  const [ingesting, setIngesting] = useState(false);
+  const [scanning, setScanning] = useState(false);
+  const [mission, setMission] = useState({
+    market: "India quick commerce",
+    company: "BigBasket BB Now",
+    region: "India",
+    objective: "Find growth opportunities and campaign ideas against faster quick-commerce rivals",
+    horizon: "30 days",
+    competitors: ["Blinkit", "Zepto", "Swiggy Instamart"],
+  });
 
   const competitorNames = useMemo(() => {
     if (!dataset) return extraCompetitors;
@@ -45,9 +59,8 @@ export function DashboardPage() {
     if (!dataset) return;
     toast.message("Spinning up agents", { description: "Streaming live OpenAI reasoning." });
     const run = await stream.start({
-      market: "India quick commerce",
-      company: "VantageIQ customer",
-      competitors: competitorNames.slice(0, 8),
+      ...mission,
+      competitors: mission.competitors.length ? mission.competitors : competitorNames.slice(0, 8),
     });
     if (run) {
       refreshRuns();
@@ -80,6 +93,47 @@ export function DashboardPage() {
   const handleAddCompetitor = (name: string) => {
     setExtraCompetitors((prev) => [...prev, name]);
     toast.success(`Tracking ${name}`, { description: "Will be included in the next agent run." });
+  };
+
+  const handleIngestSource = async (url: string) => {
+    setIngesting(true);
+    try {
+      const result = await ingestSource({
+        url,
+        market: mission.market,
+        competitor: mission.competitors[0],
+      });
+      toast.success("Source ingested", {
+        description: result.extractedSignals[0] || result.source.title,
+      });
+      await refresh();
+    } catch (err) {
+      toast.error("Source ingestion failed", {
+        description: err instanceof Error ? err.message : "Could not ingest that URL.",
+      });
+    } finally {
+      setIngesting(false);
+    }
+  };
+
+  const handleLiveResearch = async () => {
+    setScanning(true);
+    try {
+      const result = await runLiveResearch({
+        ...mission,
+        competitors: mission.competitors.length ? mission.competitors : competitorNames.slice(0, 8),
+      });
+      toast.success("Live market scan complete", {
+        description: `${result.sources.length} sources added via ${result.providers.join(", ") || "configured providers"}.`,
+      });
+      await refresh();
+    } catch (err) {
+      toast.error("Live market scan failed", {
+        description: err instanceof Error ? err.message : "Could not run provider search.",
+      });
+    } finally {
+      setScanning(false);
+    }
   };
 
   if (loading) {
@@ -134,6 +188,13 @@ export function DashboardPage() {
           {activeView === "command-center" ? (
             <>
               <HeroPanel />
+              <MissionBuilder
+                value={mission}
+                competitorOptions={competitorNames}
+                isRunning={stream.state.status === "starting" || stream.state.status === "streaming"}
+                onChange={setMission}
+                onRun={triggerRun}
+              />
               <MetricsGrid dataset={dataset} />
               <section className="content-grid">
                 <TrendRadar
@@ -146,14 +207,17 @@ export function DashboardPage() {
           ) : null}
 
           {activeView === "competitors" ? (
-            <section className="content-grid">
-              <CompetitorMonitor
-                competitors={competitors}
-                searchQuery={searchQuery}
-                onAddCompetitor={() => setDialogOpen(true)}
-              />
-              <PostureRadar competitors={competitors} />
-            </section>
+            <>
+              <section className="content-grid">
+                <CompetitorMonitor
+                  competitors={competitors}
+                  searchQuery={searchQuery}
+                  onAddCompetitor={() => setDialogOpen(true)}
+                />
+                <PostureRadar competitors={competitors} />
+              </section>
+              <CounterStrategyMatrix competitors={competitors} />
+            </>
           ) : null}
 
           {activeView === "trends" ? (
@@ -186,6 +250,12 @@ export function DashboardPage() {
                 stream={stream.state}
                 onGenerate={triggerRun}
               />
+              <BoardMemo
+                brief={brief}
+                dataset={dataset}
+                mission={mission}
+                runResult={stream.state.result}
+              />
               <section className="brief-section">
                 <ExecutiveNarrative brief={brief} runResult={stream.state.result} />
                 <MomentumForecast trends={dataset.trends} />
@@ -193,7 +263,15 @@ export function DashboardPage() {
             </>
           ) : null}
 
-          {activeView === "command-center" ? <EvidenceLayer sources={dataset.sources} /> : null}
+          {activeView === "command-center" ? (
+            <EvidenceLayer
+              sources={dataset.sources}
+              ingesting={ingesting}
+              scanning={scanning}
+              onIngestSource={handleIngestSource}
+              onRunLiveResearch={handleLiveResearch}
+            />
+          ) : null}
         </ErrorBoundary>
       </section>
 

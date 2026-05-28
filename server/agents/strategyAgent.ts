@@ -17,7 +17,7 @@ export async function runDemoStrategyAgents(request: MarketRequest): Promise<Age
     market: request.market,
     company: request.company,
     executiveSummary:
-      "India quick commerce is a density and loyalty race. Blinkit leads on ecosystem leverage and dark-store execution, Zepto is buying speed and youth mindshare with capital, and Instamart is expanding reach through Swiggy's membership base. Winning requires city-level economics, local assortment, premium basket expansion, and disciplined discounting.",
+      `${request.market} in ${request.region} is a density and loyalty race. For ${request.company}, the ${request.horizon} priority is ${request.objective.toLowerCase()}: use city-level economics, local assortment, premium basket expansion, and disciplined discounting to compete against faster rivals.`,
     insights: [
       ...insights,
       {

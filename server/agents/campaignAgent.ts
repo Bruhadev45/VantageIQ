@@ -8,7 +8,7 @@ export async function runCampaignAgent(request: MarketRequest): Promise<AgentIns
   return {
     agent: "Campaign",
     confidence: 82,
-    finding: `${request.company} should test a city-density growth campaign modeled on "${best.name}", using local assortment, speed proof, and loyalty bundles before scaling discounts.`,
+    finding: `${request.company} should test a ${request.horizon} city-density growth campaign modeled on "${best.name}", using local assortment, speed proof, and loyalty bundles before scaling discounts.`,
     evidence: [
       `${best.brand} reported ${best.lift} in demo campaign lift.`,
       `Winning pattern: ${best.pattern}.`,

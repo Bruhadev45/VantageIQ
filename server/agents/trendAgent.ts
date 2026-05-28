@@ -10,7 +10,7 @@ export async function runTrendAgent(request: MarketRequest): Promise<AgentInsigh
   return {
     agent: "Trend",
     confidence: 84,
-    finding: `${request.market} buyers are responding to ultra-fast delivery, premium baskets, and loyalty bundles; quick-commerce signal rose ${acceleration} points in the latest period.`,
+    finding: `${request.market} buyers in ${request.region} are responding to ultra-fast delivery, premium baskets, and loyalty bundles; quick-commerce signal rose ${acceleration} points in the latest period, which matters for the ${request.horizon} objective.`,
     evidence: [
       `Quick-commerce signal: ${latest.quickCommerce}.`,
       `Premium products signal: ${latest.premiumProducts}.`,
