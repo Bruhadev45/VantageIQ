@@ -35,6 +35,10 @@ import { registerAuthGuard, registerAuthRoutes } from "./auth";
 
 const app = Fastify({ logger: true });
 const port = Number(process.env.PORT || 8787);
+// Container hosts (Koyeb, Fly, Render, etc.) route traffic to 0.0.0.0; binding
+// only to 127.0.0.1 would make the service unreachable and fail health checks.
+// Defaults to all interfaces in production; override with HOST for local dev.
+const host = process.env.HOST || "0.0.0.0";
 const allowedOrigins = new Set([
   "http://127.0.0.1:5173",
   "http://localhost:5173",
@@ -392,7 +396,7 @@ function startAlertScheduler() {
 }
 
 app
-  .listen({ port, host: "127.0.0.1" })
+  .listen({ port, host })
   .then(() => startAlertScheduler())
   .catch((error) => {
     app.log.error(error);
