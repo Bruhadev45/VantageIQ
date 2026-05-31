@@ -188,6 +188,11 @@ VantageIQ/
 
 ## ☁️ Deployment
 
+**One-click starting points:**
+
+[![Deploy API to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Bruhadev45/VantageIQ)
+[![Deploy Frontend with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Bruhadev45/VantageIQ&env=VITE_API_BASE_URL&envDescription=URL%20of%20your%20deployed%20API)
+
 VantageIQ deploys as **two pieces** — the frontend can't be fully serverless because
 the API holds long-lived SSE streams (live runs) and launches Chromium (PDF export).
 
