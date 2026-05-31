@@ -1,0 +1,15 @@
+node_modules
+dist
+.git
+.vercel
+.env
+.env.local
+.env.*.local
+*.tsbuildinfo
+*.sqlite
+prisma/dev.db
+VantageIQ-Pitch-Deck.pdf
+pitch-assets
+pitch-deck.html
+record-demo.mjs
+.DS_Store
