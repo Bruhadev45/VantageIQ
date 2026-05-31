@@ -1,9 +1,12 @@
-import puppeteer from "puppeteer";
 import type { AgentRunResult } from "../src/shared/contracts";
 
 export async function generateBoardMemoPDF(
   run: AgentRunResult & { id: string; createdAt: string }
 ): Promise<Buffer> {
+  // Lazy-load puppeteer so it stays out of the module's import graph: on
+  // serverless (Vercel) Chromium isn't downloaded, so this import resolves but
+  // launch() throws — caught by the caller and surfaced as a clean 500.
+  const puppeteer = (await import("puppeteer")).default;
   let browser: Awaited<ReturnType<typeof puppeteer.launch>> | null = null;
   try {
     browser = await puppeteer.launch({ headless: true });

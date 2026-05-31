@@ -395,10 +395,18 @@ function startAlertScheduler() {
   setInterval(runCheck, ALERT_CHECK_INTERVAL_MS).unref();
 }
 
-app
-  .listen({ port, host })
-  .then(() => startAlertScheduler())
-  .catch((error) => {
-    app.log.error(error);
-    process.exit(1);
-  });
+// Long-running mode (local dev, containers): bind a port and start the
+// background alert scheduler. On Vercel there is no persistent process — the
+// app is driven per-request by api/[...path].ts — so skip both there.
+if (!process.env.VERCEL) {
+  app
+    .listen({ port, host })
+    .then(() => startAlertScheduler())
+    .catch((error) => {
+      app.log.error(error);
+      process.exit(1);
+    });
+}
+
+// Exposed so the Vercel serverless entry can drive the same Fastify instance.
+export { app };
