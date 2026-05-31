@@ -1,5 +1,9 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { app } from "../server/index";
+// Import the pre-bundled server (built by scripts/build-api.mjs in postinstall):
+// a single ESM file with all local imports inlined, so Node's ESM loader can
+// resolve it without per-file extension issues.
+// @ts-ignore - generated at build time by scripts/build-api.mjs; no static types.
+import { app } from "../server/_bundle/app.mjs";
 
 // Catch-all serverless entry: every /api/* request is handed to the existing
 // Fastify instance (which registers routes under the same /api prefix), so the
@@ -12,7 +16,8 @@ let ready: Promise<unknown> | undefined;
 
 export default async function handler(req: IncomingMessage, res: ServerResponse) {
   // Fastify must finish plugin/route registration once before serving.
-  if (!ready) ready = app.ready();
+  // .then() normalizes Fastify's PromiseLike into a real Promise.
+  if (!ready) ready = app.ready().then(() => undefined);
   await ready;
   app.server.emit("request", req, res);
 }

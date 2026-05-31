@@ -7,3 +7,4 @@ dist
 prisma/dev.db
 *.sqlite
 .vercel
+server/_bundle

@@ -14,7 +14,8 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "preview": "vite preview --host 127.0.0.1",
-    "postinstall": "prisma generate"
+    "build:api": "node scripts/build-api.mjs",
+    "postinstall": "prisma generate && node scripts/build-api.mjs"
   },
   "dependencies": {
     "@fastify/cors": "^11.2.0",
@@ -43,6 +44,7 @@
     "@types/node": "^25.9.1",
     "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",
+    "esbuild": "^0.25.0",
     "puppeteer": "^25.1.0",
     "typescript": "^5.6.3"
   },
