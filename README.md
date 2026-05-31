@@ -186,6 +186,29 @@ VantageIQ/
 
 ---
 
+## ☁️ Deployment
+
+VantageIQ deploys as **two pieces** — the frontend can't be fully serverless because
+the API holds long-lived SSE streams (live runs) and launches Chromium (PDF export).
+
+**1. Database — Neon (free Postgres)**
+- Create a project at [neon.tech](https://neon.tech), copy the connection string.
+
+**2. API — Render (persistent host)** — config in [`render.yaml`](./render.yaml)
+- render.com → New → **Blueprint** → connect this GitHub repo → apply.
+- Set secrets: `DATABASE_URL` (Neon), `OPENAI_API_KEY`, provider keys, and
+  `CORS_ORIGINS` = your Vercel URL. Build runs `prisma db push` + seed automatically.
+- Note the API URL, e.g. `https://vantageiq-api.onrender.com`.
+
+**3. Frontend — Vercel** — config in [`vercel.json`](./vercel.json)
+- vercel.com → Add New → **Project** → **Import Git Repository** → pick this repo.
+- Add env var **`VITE_API_BASE_URL`** = your Render API URL (Vite inlines it at build).
+- Deploy. Every `git push` now auto-deploys.
+
+> Want it *all* on Vercel? The API needs refactoring to serverless (wrap Fastify as
+> a function, swap `puppeteer` → `puppeteer-core` + `@sparticuz/chromium`, raise
+> `maxDuration` for streaming). The two-host setup above is the reliable path.
+
 ## 🧪 API Verification
 
 ```bash

@@ -42,8 +42,23 @@ const allowedOrigins = new Set([
   "http://localhost:5174",
 ]);
 
+// Allow deployed frontends (e.g. the Vercel URL) via env, comma-separated.
+for (const origin of (process.env.CORS_ORIGINS ?? process.env.WEB_ORIGIN ?? "")
+  .split(",")
+  .map((value) => value.trim())
+  .filter(Boolean)) {
+  allowedOrigins.add(origin);
+}
+
 await app.register(cors, {
-  origin: Array.from(allowedOrigins),
+  // Permit *.vercel.app preview/prod domains plus the explicit allowlist above.
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.has(origin) || /\.vercel\.app$/.test(new URL(origin).hostname)) {
+      callback(null, true);
+      return;
+    }
+    callback(null, false);
+  },
   credentials: true,
 });
 
