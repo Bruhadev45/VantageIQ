@@ -5,8 +5,9 @@ import type { IncomingMessage, ServerResponse } from "node:http";
 // @ts-ignore - generated at build time by scripts/build-api.mjs; no static types.
 import { app } from "../server/_bundle/app.mjs";
 
-// Catch-all serverless entry: every /api/* request is handed to the existing
-// Fastify instance (which registers routes under the same /api prefix), so the
+// Single serverless entry: vercel.json rewrites every /api/* request here, and
+// each one is handed to the existing Fastify instance (which registers routes
+// under the same /api prefix). req.url is preserved across the rewrite, so the
 // one app serves both the local long-running server and Vercel functions.
 
 // Allow long-lived SSE streams up to the Hobby ceiling (60s).
