@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import { Bell, ChevronDown, Clock, Download, Search } from "lucide-react";
+import { Bell, ChevronDown, Clock, Download, LogOut, Search } from "lucide-react";
 import type { ApiStatus } from "../../hooks/useDataset";
 import type { RunSummary } from "../../shared/contracts";
+import { GlobalSearch } from "../search/GlobalSearch";
 
 type Props = {
   searchValue: string;
@@ -12,6 +13,9 @@ type Props = {
   onExport: () => void;
   onShowNotifications: () => void;
   notificationsCount: number;
+  onSourcesAdded?: () => void;
+  userEmail?: string;
+  onLogout?: () => void;
 };
 
 export function Topbar({
@@ -23,6 +27,9 @@ export function Topbar({
   onExport,
   onShowNotifications,
   notificationsCount,
+  onSourcesAdded,
+  userEmail,
+  onLogout,
 }: Props) {
   const [historyOpen, setHistoryOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -51,12 +58,13 @@ export function Topbar({
       <div className="search-box">
         <Search size={18} />
         <input
-          aria-label="Search market intelligence"
-          placeholder="Search companies, campaigns, trends..."
+          aria-label="Filter competitors and campaigns"
+          placeholder="Filter competitors & campaigns..."
           value={searchValue}
           onChange={(event) => onSearchChange(event.target.value)}
         />
       </div>
+      <GlobalSearch onSourcesAdded={onSourcesAdded} />
       <button type="button" className={`market-select status-${apiStatus}`}>
         {statusLabel}
         <ChevronDown size={16} />
@@ -115,6 +123,14 @@ export function Topbar({
         <Download size={17} />
         Export
       </button>
+      {onLogout ? (
+        <div className="account-chip" title={userEmail ? `Signed in as ${userEmail}` : "Account"}>
+          <span className="account-avatar">{(userEmail?.[0] ?? "U").toUpperCase()}</span>
+          <button type="button" className="icon-button" aria-label="Log out" onClick={onLogout}>
+            <LogOut size={18} />
+          </button>
+        </div>
+      ) : null}
     </header>
   );
 }

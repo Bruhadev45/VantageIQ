@@ -17,7 +17,7 @@ export async function runDemoStrategyAgents(request: MarketRequest): Promise<Age
     market: request.market,
     company: request.company,
     executiveSummary:
-      `${request.market} in ${request.region} is a density and loyalty race. For ${request.company}, the ${request.horizon} priority is ${request.objective.toLowerCase()}: use city-level economics, local assortment, premium basket expansion, and disciplined discounting to compete against faster rivals.`,
+      `${request.market} in ${request.region} is a density and loyalty race. For ${request.company}, the ${request.horizon} ${request.decisionType} priority is ${request.objective.toLowerCase()}: use city-level economics, local assortment, premium basket expansion, and disciplined discounting to compete against faster rivals.`,
     insights: [
       ...insights,
       {

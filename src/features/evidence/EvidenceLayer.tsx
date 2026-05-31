@@ -72,7 +72,14 @@ export function EvidenceLayer({
               <span>{source.publisher}</span>
               <strong>{source.title}</strong>
               <p>{source.notes}</p>
-              <small>{source.date}</small>
+              <div className="source-quality">
+                <small>{source.date}</small>
+                {source.reliabilityScore ? (
+                  <small className={`reliability reliability-${source.reliabilityLabel?.toLowerCase()}`}>
+                    {source.reliabilityLabel} trust · {source.reliabilityScore}/100
+                  </small>
+                ) : null}
+              </div>
             </a>
           ))
         )}

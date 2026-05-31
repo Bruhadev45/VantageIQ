@@ -47,6 +47,7 @@ function toSourceSummary(row: {
   date: string;
   notes: string;
 }): MarketSourceSummary {
+  const reliability = scoreSourceReliability(row);
   return {
     id: row.id,
     title: row.title,
@@ -54,7 +55,54 @@ function toSourceSummary(row: {
     url: row.url,
     date: row.date,
     notes: row.notes,
+    reliabilityScore: reliability.score,
+    reliabilityLabel: reliability.label,
+    recencyDays: reliability.recencyDays,
+    evidenceStrength: reliability.evidenceStrength,
   };
+}
+
+function scoreSourceReliability(row: { publisher: string; url: string; date: string; notes: string }) {
+  const publisher = row.publisher.toLowerCase();
+  const host = safeHostname(row.url);
+  const institutionalPublisher =
+    publisher.includes("usda") ||
+    publisher.includes("swiggy") ||
+    publisher.includes("exchange") ||
+    publisher.includes("filing") ||
+    host.endsWith(".gov") ||
+    host.endsWith(".edu") ||
+    host.includes("swiggy.com");
+  const knownBusinessPublisher =
+    publisher.includes("financial") ||
+    publisher.includes("economic") ||
+    publisher.includes("business") ||
+    publisher.includes("indira");
+
+  const recencyDays = daysSince(row.date);
+  const recencyScore = recencyDays === null ? 12 : recencyDays <= 90 ? 25 : recencyDays <= 365 ? 18 : 10;
+  const publisherScore = institutionalPublisher ? 35 : knownBusinessPublisher ? 28 : 18;
+  const signalCount = row.notes.split("|").map((signal) => signal.trim()).filter(Boolean).length;
+  const evidenceStrength = Math.min(30, 10 + signalCount * 4 + (/\d/.test(row.notes) ? 6 : 0));
+  const score = Math.max(1, Math.min(100, publisherScore + recencyScore + evidenceStrength));
+  const label: MarketSourceSummary["reliabilityLabel"] = score >= 78 ? "High" : score >= 55 ? "Medium" : "Low";
+
+  return { score, label, recencyDays, evidenceStrength };
+}
+
+function safeHostname(url: string) {
+  try {
+    return new URL(url).hostname.toLowerCase();
+  } catch {
+    return "";
+  }
+}
+
+function daysSince(value: string): number | null {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  const days = Math.floor((Date.now() - date.getTime()) / 86_400_000);
+  return days < 0 ? 0 : days;
 }
 
 function toCompetitor(row: {
@@ -147,6 +195,53 @@ function toRecommendation(row: {
     motion: row.motion,
     action: row.action,
   };
+}
+
+export async function createCompetitor(input: {
+  name: string;
+  category: string;
+  marketShare: number;
+  growth: number;
+  sentiment: number;
+  engagement: number;
+  pricing: string;
+  moat: string;
+  fastestChannel: string;
+  risk: string;
+  insight: string;
+}): Promise<MarketCompetitor> {
+  const id = input.name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "") || `competitor-${Date.now().toString(36)}`;
+
+  const row = await prisma.competitor.upsert({
+    where: { id },
+    update: {
+      name: input.name,
+      category: input.category,
+    },
+    create: {
+      id,
+      name: input.name,
+      category: input.category,
+      marketShare: input.marketShare,
+      growth: input.growth,
+      sentiment: input.sentiment,
+      engagement: input.engagement,
+      revenueInrCr: null,
+      cities: null,
+      stores: null,
+      pricing: input.pricing,
+      moat: input.moat,
+      fastestChannel: input.fastestChannel,
+      risk: input.risk,
+      insight: input.insight,
+      sourceId: "user-added",
+    },
+  });
+
+  return toCompetitor(row);
 }
 
 type RunRow = {
@@ -289,4 +384,222 @@ export async function updateRun(
 
   const row = await prisma.run.update({ where: { id }, data });
   return toRunDetail(row as RunRow);
+}
+
+// ==================== Alerts ====================
+
+export type AlertSummary = {
+  id: string;
+  type: string;
+  severity: string;
+  competitor: string;
+  metric: string;
+  currentValue: number;
+  threshold: number;
+  message: string;
+  isRead: boolean;
+  triggeredAt: string;
+};
+
+export type AlertRuleSummary = {
+  id: string;
+  name: string;
+  competitor: string;
+  metric: string;
+  operator: string;
+  threshold: number;
+  severity: string;
+  isEnabled: boolean;
+};
+
+export async function listAlerts(limit = 50): Promise<AlertSummary[]> {
+  const rows = await prisma.alert.findMany({
+    where: { isActive: true },
+    orderBy: { triggeredAt: "desc" },
+    take: limit,
+  });
+  return rows.map((row) => ({
+    id: row.id,
+    type: row.type,
+    severity: row.severity,
+    competitor: row.competitor,
+    metric: row.metric,
+    currentValue: row.currentValue,
+    threshold: row.threshold,
+    message: row.message,
+    isRead: row.isRead,
+    triggeredAt: row.triggeredAt.toISOString(),
+  }));
+}
+
+export async function markAlertRead(id: string): Promise<void> {
+  await prisma.alert.update({ where: { id }, data: { isRead: true } });
+}
+
+export async function markAllAlertsRead(): Promise<void> {
+  await prisma.alert.updateMany({ where: { isRead: false }, data: { isRead: true } });
+}
+
+export async function createAlert(input: {
+  type: string;
+  severity: string;
+  competitor: string;
+  metric: string;
+  currentValue: number;
+  threshold: number;
+  message: string;
+}): Promise<AlertSummary> {
+  const row = await prisma.alert.create({ data: input });
+  return {
+    id: row.id,
+    type: row.type,
+    severity: row.severity,
+    competitor: row.competitor,
+    metric: row.metric,
+    currentValue: row.currentValue,
+    threshold: row.threshold,
+    message: row.message,
+    isRead: row.isRead,
+    triggeredAt: row.triggeredAt.toISOString(),
+  };
+}
+
+export async function listAlertRules(): Promise<AlertRuleSummary[]> {
+  const rows = await prisma.alertRule.findMany({ orderBy: { createdAt: "desc" } });
+  return rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    competitor: row.competitor,
+    metric: row.metric,
+    operator: row.operator,
+    threshold: row.threshold,
+    severity: row.severity,
+    isEnabled: row.isEnabled,
+  }));
+}
+
+export async function createAlertRule(input: {
+  name: string;
+  competitor: string;
+  metric: string;
+  operator: string;
+  threshold: number;
+  severity: string;
+}): Promise<AlertRuleSummary> {
+  const row = await prisma.alertRule.create({ data: input });
+  return {
+    id: row.id,
+    name: row.name,
+    competitor: row.competitor,
+    metric: row.metric,
+    operator: row.operator,
+    threshold: row.threshold,
+    severity: row.severity,
+    isEnabled: row.isEnabled,
+  };
+}
+
+export async function toggleAlertRule(id: string, isEnabled: boolean): Promise<void> {
+  await prisma.alertRule.update({ where: { id }, data: { isEnabled } });
+}
+
+export async function deleteAlertRule(id: string): Promise<void> {
+  await prisma.alertRule.delete({ where: { id } });
+}
+
+// Window (ms) within which a matching unread alert suppresses a duplicate.
+const ALERT_DEDUP_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+
+// Check all rules against current data and create alerts
+export async function checkAlertRules(): Promise<AlertSummary[]> {
+  const [rules, { competitors }] = await Promise.all([
+    prisma.alertRule.findMany({ where: { isEnabled: true } }),
+    getMarketDataset(),
+  ]);
+
+  const newAlerts: AlertSummary[] = [];
+  const since = new Date(Date.now() - ALERT_DEDUP_WINDOW_MS);
+
+  for (const rule of rules) {
+    const targetCompetitors = rule.competitor === "any"
+      ? competitors
+      : competitors.filter((c) => c.name.toLowerCase() === rule.competitor.toLowerCase());
+
+    for (const comp of targetCompetitors) {
+      const value = getMetricValue(comp, rule.metric);
+      if (value === null) continue;
+
+      const triggered = checkThreshold(value, rule.operator, rule.threshold);
+      if (!triggered) continue;
+
+      const type = `${rule.metric}_${rule.operator}`;
+
+      // Deduplicate: skip if an equivalent alert already fired recently.
+      const existing = await prisma.alert.findFirst({
+        where: {
+          competitor: comp.name,
+          metric: rule.metric,
+          type,
+          isActive: true,
+          triggeredAt: { gte: since },
+        },
+      });
+      if (existing) continue;
+
+      const alert = await createAlert({
+        type,
+        severity: rule.severity,
+        competitor: comp.name,
+        metric: rule.metric,
+        currentValue: value,
+        threshold: rule.threshold,
+        message: `${comp.name}'s ${metricLabel(rule.metric)} (${value}) ${operatorText(rule.operator)} ${rule.threshold}`,
+      });
+      newAlerts.push(alert);
+    }
+  }
+
+  return newAlerts;
+}
+
+function metricLabel(metric: string): string {
+  switch (metric) {
+    case "growth": return "growth";
+    case "marketShare": return "market share";
+    case "sentiment": return "sentiment";
+    case "engagement": return "engagement";
+    default: return metric;
+  }
+}
+
+function getMetricValue(comp: MarketCompetitor, metric: string): number | null {
+  switch (metric) {
+    case "growth": return comp.growth;
+    case "marketShare": return comp.marketShare;
+    case "sentiment": return comp.sentiment;
+    case "engagement": return comp.engagement;
+    default: return null;
+  }
+}
+
+function checkThreshold(value: number, operator: string, threshold: number): boolean {
+  switch (operator) {
+    case "gt": return value > threshold;
+    case "lt": return value < threshold;
+    case "eq": return value === threshold;
+    case "gte": return value >= threshold;
+    case "lte": return value <= threshold;
+    default: return false;
+  }
+}
+
+function operatorText(operator: string): string {
+  switch (operator) {
+    case "gt": return "exceeded";
+    case "lt": return "dropped below";
+    case "eq": return "equals";
+    case "gte": return "reached or exceeded";
+    case "lte": return "fell to or below";
+    default: return "triggered at";
+  }
 }

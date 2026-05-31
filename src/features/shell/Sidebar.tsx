@@ -1,6 +1,6 @@
-import { ArrowUpRight, BarChart3, Bot, BrainCircuit, Building2, LineChart as LineChartIcon, Megaphone, Sparkles } from "lucide-react";
+import { ArrowUpRight, BarChart3, Bell, Bot, BrainCircuit, Building2, LineChart as LineChartIcon, Megaphone, Sparkles } from "lucide-react";
 
-export type SidebarView = "command-center" | "competitors" | "trends" | "campaigns" | "strategy";
+export type SidebarView = "command-center" | "competitors" | "trends" | "campaigns" | "strategy" | "alerts";
 
 const NAV_ITEMS: { label: string; view: SidebarView; icon: typeof BarChart3 }[] = [
   { label: "Command Center", view: "command-center", icon: BarChart3 },
@@ -8,6 +8,7 @@ const NAV_ITEMS: { label: string; view: SidebarView; icon: typeof BarChart3 }[] 
   { label: "Trend Radar", view: "trends", icon: LineChartIcon },
   { label: "Campaign Lab", view: "campaigns", icon: Megaphone },
   { label: "AI Strategy Room", view: "strategy", icon: BrainCircuit },
+  { label: "Alerts", view: "alerts", icon: Bell },
 ];
 
 type Props = {

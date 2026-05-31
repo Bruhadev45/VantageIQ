@@ -8,8 +8,9 @@ type Props = {
 export function PostureRadar({ competitors }: Props) {
   const data = competitors.map((competitor) => ({
     company: competitor.name,
-    Sentiment: Math.round(competitor.sentiment * 100),
-    Engagement: competitor.engagement,
+    // sentiment and engagement are already on a 0-100 scale from the API.
+    Sentiment: Math.round(competitor.sentiment),
+    Engagement: Math.round(competitor.engagement),
   }));
 
   return (
@@ -21,7 +22,7 @@ export function PostureRadar({ competitors }: Props) {
         </div>
       </div>
       <div className="radar-frame">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" minHeight={240}>
           <RadarChart data={data}>
             <PolarGrid stroke="#e5e5e5" />
             <PolarAngleAxis dataKey="company" tick={{ fontSize: 11, fill: '#6b6b7b' }} />

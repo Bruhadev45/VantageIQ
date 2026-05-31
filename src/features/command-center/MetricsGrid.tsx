@@ -15,7 +15,7 @@ export function MetricsGrid({ dataset }: Props) {
   const latestTrend = dataset.trends[dataset.trends.length - 1];
   const previousTrend = dataset.trends[dataset.trends.length - 2];
   const trendDelta =
-    latestTrend && previousTrend
+    latestTrend && previousTrend && previousTrend.quickCommerce !== 0
       ? Math.round(((latestTrend.quickCommerce - previousTrend.quickCommerce) / previousTrend.quickCommerce) * 100)
       : 0;
 

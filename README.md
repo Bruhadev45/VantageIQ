@@ -41,11 +41,13 @@ Define Mission → AI Agents Activate → Live Dashboard → Export Strategy
 | Feature | Description |
 |---------|-------------|
 | **Multi-Agent AI** | Research, Trend, Campaign, and Strategy agents work in parallel |
-| **Live Streaming** | Watch AI reasoning in real-time via SSE |
+| **Live Streaming** | Watch AI reasoning in real-time via SSE, with a live run timer & progress |
 | **Mission Builder** | Configure market, company, and competitors to track |
-| **Board Memos** | Auto-generated executive summaries |
+| **Board Memos** | Auto-generated executive summaries, exportable as PDF |
 | **Counter Strategies** | AI-recommended responses to competitor moves |
-| **Evidence Layer** | Source-backed market data with citations |
+| **Evidence Layer** | Source-backed market data with citations + one-click live web scan |
+| **Authentication** | Email/password signup & login (bcrypt + JWT); mutations are token-guarded |
+| **Guided Tour** | First-run spotlight tour that walks new users through the workflow |
 
 ---
 
@@ -90,20 +92,36 @@ npm run db:seed
 cp .env.example .env.local
 # Edit .env.local with your OPENAI_API_KEY
 
-# Run development servers
+# Run development servers (web on :5173, API on :8787)
 npm run dev
 ```
+
+On first launch you'll be asked to **create an account** (email + password), then a short **guided tour** walks you through running the AI analyst team. Seeded market data is shared across accounts.
 
 ### Environment Variables
 
 ```env
+# Required for live AI agents & chat (omit for demo mode)
 OPENAI_API_KEY=sk-...
 OPENAI_MODEL=gpt-4o
-DATABASE_URL="postgresql://USER@localhost:5432/vantageiq_local?schema=public"
+
+# Optional research providers (live market scans + richer ingestion)
+SERPAPI_API_KEY=
+FIRECRAWL_API_KEY=
+EXA_API_KEY=
+
+# PostgreSQL (TCP). Local-socket alt: ...?host=%2Ftmp&schema=public
+DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/vantageiq_local?schema=public"
+
+# Secret for signing auth JWTs — set a long random string (e.g. `openssl rand -hex 32`)
+AUTH_JWT_SECRET=change-me-to-a-long-random-string
+
 PORT=8787
+ALERT_CHECK_INTERVAL_MS=300000   # auto alert-rule evaluation cadence (ms)
+VITE_API_BASE_URL=               # override API URL when web/API are on different hosts
 ```
 
-> **Note:** If `OPENAI_API_KEY` is unset, the API runs in demo mode with pre-configured agent responses.
+> **Note:** If `OPENAI_API_KEY` is unset, the API runs in demo mode with pre-configured agent responses. The research providers (Exa, SerpAPI, Firecrawl) are optional — live market scans degrade gracefully when their keys are absent.
 
 ---
 
@@ -154,10 +172,16 @@ VantageIQ/
 - [x] Mission builder
 - [x] Board memo generation
 - [x] Counter-strategy matrix
-- [ ] Authentication (better-auth)
-- [ ] Live data ingestion (Exa, NewsAPI)
+- [x] Live data ingestion (Exa, SerpAPI, Firecrawl) + global web search
+- [x] PDF export (Puppeteer board memos)
+- [x] Alert rules with automatic background evaluation
+- [x] Competitor tracking persisted to the workspace
+- [x] Scenario simulator + campaign A/B test planner + trend-driver drilldowns
+- [x] AI chat assistant with conversation memory
+- [x] Authentication (email/password + JWT, token-guarded mutations)
+- [x] First-run guided product tour
+- [ ] Multi-tenant workspaces & per-user data isolation
 - [ ] Email alerts (Resend)
-- [ ] PDF export
 - [ ] Vercel + Railway deployment
 
 ---
@@ -165,15 +189,20 @@ VantageIQ/
 ## 🧪 API Verification
 
 ```bash
-# Health check
+# Health check (open)
 curl http://127.0.0.1:8787/api/health
 
-# Create a run
-curl -X POST http://127.0.0.1:8787/api/runs \
+# Sign up to get a token (mutations require it)
+TOKEN=$(curl -s -X POST http://127.0.0.1:8787/api/auth/signup \
   -H 'content-type: application/json' \
+  -d '{"email":"you@example.com","password":"hunter2pass"}' | sed -n 's/.*"token":"\([^"]*\)".*/\1/p')
+
+# Create a run (needs the bearer token)
+curl -X POST http://127.0.0.1:8787/api/runs \
+  -H 'content-type: application/json' -H "authorization: Bearer $TOKEN" \
   -d '{"market":"India quick commerce","company":"Test","competitors":["Blinkit","Zepto"]}'
 
-# Stream results (replace $RUN_ID)
+# Stream results — open, no token needed (replace $RUN_ID)
 curl -N "http://127.0.0.1:8787/api/runs/$RUN_ID/stream"
 ```
 

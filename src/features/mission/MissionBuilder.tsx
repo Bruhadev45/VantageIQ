@@ -1,4 +1,15 @@
-import { BrainCircuit, Building2, CalendarClock, Globe2, Target, Users, Zap } from "lucide-react";
+import {
+  BrainCircuit,
+  Building2,
+  CalendarClock,
+  DollarSign,
+  Globe2,
+  Radio,
+  Target,
+  UserRound,
+  Users,
+  Zap,
+} from "lucide-react";
 import type { MarketRequest } from "../../shared/contracts";
 
 type Props = {
@@ -20,6 +31,15 @@ export function MissionBuilder({ value, competitorOptions, isRunning, onChange, 
       : [...value.competitors, name].slice(0, 8);
     update("competitors", competitors);
   };
+
+  const toggleChannel = (name: string) => {
+    const channels = value.channels.includes(name)
+      ? value.channels.filter((channel) => channel !== name)
+      : [...value.channels, name].slice(0, 8);
+    update("channels", channels);
+  };
+
+  const channelOptions = ["App CRM", "Paid social", "Creator", "Search", "Partnerships", "Pricing", "Loyalty"];
 
   return (
     <section className="mission-builder">
@@ -105,6 +125,66 @@ export function MissionBuilder({ value, competitorOptions, isRunning, onChange, 
             <option>2 quarters</option>
           </select>
         </label>
+
+        <label>
+          <span>
+            <Target size={15} />
+            Decision
+          </span>
+          <select value={value.decisionType} onChange={(event) => update("decisionType", event.target.value as MarketRequest["decisionType"])}>
+            <option value="growth">Growth</option>
+            <option value="pricing">Pricing</option>
+            <option value="campaign">Campaign</option>
+            <option value="product">Product</option>
+            <option value="market-entry">Market entry</option>
+            <option value="board-brief">Board brief</option>
+          </select>
+        </label>
+
+        <label>
+          <span>
+            <DollarSign size={15} />
+            Budget
+          </span>
+          <select value={value.budgetRange} onChange={(event) => update("budgetRange", event.target.value)}>
+            <option value="">Not specified</option>
+            <option>Low pilot budget</option>
+            <option>Medium city launch budget</option>
+            <option>High growth budget</option>
+            <option>Enterprise expansion budget</option>
+          </select>
+        </label>
+
+        <label className="wide">
+          <span>
+            <UserRound size={15} />
+            Target customer
+          </span>
+          <input
+            value={value.targetCustomer}
+            onChange={(event) => update("targetCustomer", event.target.value)}
+            placeholder="e.g. metro families buying weekly staples"
+          />
+        </label>
+
+        <fieldset className="competitor-picker">
+          <legend>
+            <Radio size={15} />
+            Channels
+          </legend>
+          <div>
+            {channelOptions.map((channel) => (
+              <button
+                type="button"
+                className={value.channels.includes(channel) ? "selected" : ""}
+                key={channel}
+                onClick={() => toggleChannel(channel)}
+              >
+                {channel}
+              </button>
+            ))}
+          </div>
+        </fieldset>
 
         <fieldset className="competitor-picker">
           <legend>

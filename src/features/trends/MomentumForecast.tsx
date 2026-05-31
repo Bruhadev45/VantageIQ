@@ -15,7 +15,7 @@ export function MomentumForecast({ trends }: Props) {
         </div>
       </div>
       <div className="chart-frame small">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" minHeight={240}>
           <LineChart data={trends}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" vertical={false} />
             <XAxis dataKey="period" axisLine={false} tickLine={false} tick={{ fill: '#6b6b7b', fontSize: 11 }} />

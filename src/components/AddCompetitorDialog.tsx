@@ -1,24 +1,32 @@
 import { useState } from "react";
-import { X } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  onAdd: (name: string) => void;
+  onAdd: (name: string, category: string) => Promise<void> | void;
 };
 
 export function AddCompetitorDialog({ open, onClose, onAdd }: Props) {
   const [name, setName] = useState("");
+  const [category, setCategory] = useState("Challenger");
+  const [submitting, setSubmitting] = useState(false);
 
   if (!open) return null;
 
-  const handleSubmit = (event: React.FormEvent) => {
+  const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     const trimmed = name.trim();
-    if (!trimmed) return;
-    onAdd(trimmed);
-    setName("");
-    onClose();
+    if (!trimmed || submitting) return;
+    setSubmitting(true);
+    try {
+      await onAdd(trimmed, category.trim() || "Challenger");
+      setName("");
+      setCategory("Challenger");
+      onClose();
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -30,19 +38,28 @@ export function AddCompetitorDialog({ open, onClose, onAdd }: Props) {
             <X size={18} />
           </button>
         </header>
-        <p>Add a competitor name to your next agent run. Live ingestion will be wired in a follow-up phase.</p>
+        <p>
+          The competitor is saved to your workspace, appears across every view, and is analyzed in future agent runs.
+          Run a live market scan to enrich its profile with real metrics.
+        </p>
         <input
           autoFocus
-          placeholder="e.g. Zepto, Blinkit, BigBasket"
+          placeholder="Competitor name — e.g. Flipkart Minutes"
           value={name}
           onChange={(event) => setName(event.target.value)}
         />
+        <input
+          placeholder="Category — e.g. Quick commerce, Marketplace"
+          value={category}
+          onChange={(event) => setCategory(event.target.value)}
+        />
         <div className="dialog-actions">
-          <button type="button" className="ghost-button" onClick={onClose}>
+          <button type="button" className="ghost-button" onClick={onClose} disabled={submitting}>
             Cancel
           </button>
-          <button type="submit" className="primary-button">
-            Add competitor
+          <button type="submit" className="primary-button" disabled={submitting || !name.trim()}>
+            {submitting ? <Loader2 size={16} className="spin" /> : null}
+            {submitting ? "Adding…" : "Add competitor"}
           </button>
         </div>
       </form>

@@ -19,7 +19,7 @@ export function TrendRadar({ trends, onViewDrivers }: Props) {
         </button>
       </div>
       <div className="chart-frame">
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" minHeight={240}>
           <AreaChart data={trends}>
             <defs>
               <linearGradient id="quickCommerce" x1="0" y1="0" x2="0" y2="1">

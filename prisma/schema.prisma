@@ -7,6 +7,14 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String?
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
+
 model MarketSource {
   id        String   @id
   title     String
@@ -91,4 +99,35 @@ model Run {
   createdAt        DateTime  @default(now())
 
   @@index([createdAt(sort: Desc)])
+}
+
+model Alert {
+  id           String    @id @default(cuid())
+  type         String    // growth_spike, market_share_change, new_campaign, sentiment_drop
+  severity     String    @default("medium") // low, medium, high, critical
+  competitor   String
+  metric       String
+  currentValue Float
+  threshold    Float
+  message      String
+  isRead       Boolean   @default(false)
+  isActive     Boolean   @default(true)
+  triggeredAt  DateTime  @default(now())
+  createdAt    DateTime  @default(now())
+
+  @@index([triggeredAt(sort: Desc)])
+  @@index([isRead])
+}
+
+model AlertRule {
+  id          String   @id @default(cuid())
+  name        String
+  competitor  String   // competitor name or "any"
+  metric      String   // growth, marketShare, sentiment, engagement
+  operator    String   // gt, lt, eq, change_by
+  threshold   Float
+  severity    String   @default("medium")
+  isEnabled   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

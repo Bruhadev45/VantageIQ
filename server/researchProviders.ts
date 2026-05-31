@@ -155,6 +155,14 @@ async function searchSerpApi(query: string): Promise<CandidateSource[]> {
 }
 
 export async function runLiveResearch(request: MarketRequest): Promise<LiveResearchResult> {
+  if (!process.env.EXA_API_KEY && !process.env.SERPAPI_API_KEY) {
+    const error = new Error(
+      "No research providers configured. Set EXA_API_KEY or SERPAPI_API_KEY to enable live market scans.",
+    ) as Error & { statusCode: number };
+    error.statusCode = 503;
+    throw error;
+  }
+
   const query = buildQuery(request);
   const providers: string[] = [];
   const settled = await Promise.allSettled([searchExa(query), searchSerpApi(query)]);

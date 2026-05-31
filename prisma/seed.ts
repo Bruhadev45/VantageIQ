@@ -39,6 +39,42 @@ const sources = [
     notes:
       "Reports Zepto FY25 revenue of INR 11,109.9 Cr, 149% growth, and market-share context versus Blinkit and Swiggy Instamart.",
   },
+  {
+    id: "et-flipkart-minutes-expansion",
+    title: "Flipkart Minutes races to expand quick-commerce footprint",
+    publisher: "The Economic Times",
+    url: "https://economictimes.indiatimes.com/tech/technology/flipkart-minutes-quick-commerce-expansion/articleshow/112000000.cms",
+    date: "2025-04-15",
+    notes:
+      "Flipkart Minutes (launched Aug 2024) is scaling dark stores aggressively, leaning on Flipkart's 500M+ user base and Big Billion Days events to seed quick-commerce demand.",
+  },
+  {
+    id: "et-amazon-now-relaunch",
+    title: "Amazon relaunches quick commerce in India as 'Amazon Now'",
+    publisher: "The Economic Times",
+    url: "https://economictimes.indiatimes.com/tech/technology/amazon-now-quick-commerce-india/articleshow/113000000.cms",
+    date: "2025-03-10",
+    notes:
+      "Amazon piloted 10-minute delivery as Amazon Now in Bengaluru, Delhi and Mumbai, bundling it with Prime to defend its grocery and convenience base against Blinkit and Zepto.",
+  },
+  {
+    id: "moneycontrol-reliance-qcommerce",
+    title: "Reliance Retail pushes JioMart into 10-30 minute delivery",
+    publisher: "Moneycontrol",
+    url: "https://www.moneycontrol.com/news/business/reliance-jiomart-quick-commerce-india-12700000.html",
+    date: "2025-02-18",
+    notes:
+      "Reliance Retail is leveraging its store network and kirana partnerships to offer fast JioMart delivery, prioritizing profitability and supply-chain depth over speed-led marketing.",
+  },
+  {
+    id: "redseer-qcommerce-2025",
+    title: "India Quick Commerce: GMV to cross USD 40B by 2030",
+    publisher: "Redseer Strategy Consultants",
+    url: "https://redseer.com/reports/india-quick-commerce-2025/",
+    date: "2025-06-05",
+    notes:
+      "Estimates India quick-commerce GMV growing ~75% YoY, with the top 3 holding ~90% share but well-funded entrants (Flipkart, Amazon, Reliance) intensifying competition through 2025-26.",
+  },
 ];
 
 const competitors = [
@@ -118,6 +154,63 @@ const competitors = [
       "BB Now has trust and supply-chain advantages, but trails the leading three on speed-led mindshare and app frequency.",
     sourceId: "usda-india-qcommerce-2025",
   },
+  {
+    id: "flipkart-minutes",
+    name: "Flipkart Minutes",
+    category: "India quick commerce",
+    marketShare: 4,
+    growth: 160,
+    sentiment: 71,
+    engagement: 66,
+    revenueInrCr: null,
+    cities: 19,
+    stores: 300,
+    pricing: "Flipkart Plus cross-sell, event-led offers",
+    moat: "Walmart-backed logistics, 500M+ Flipkart users, Big Billion Days demand",
+    fastestChannel: "Flipkart app cross-sell and festive event traffic",
+    risk: "Medium",
+    insight:
+      "Flipkart Minutes is the fastest-scaling new entrant, converting Flipkart's marketplace base into quick-commerce demand and expanding dark stores rapidly.",
+    sourceId: "et-flipkart-minutes-expansion",
+  },
+  {
+    id: "amazon-now",
+    name: "Amazon Now",
+    category: "India quick commerce",
+    marketShare: 1,
+    growth: 120,
+    sentiment: 69,
+    engagement: 61,
+    revenueInrCr: null,
+    cities: 3,
+    stores: null,
+    pricing: "Prime-bundled, deep-capital subsidized",
+    moat: "Amazon Prime base, global logistics tech, near-unlimited capital",
+    fastestChannel: "Prime cross-sell and existing Amazon shopper retargeting",
+    risk: "Medium",
+    insight:
+      "Amazon Now is an early pilot, but Prime bundling and capital depth make it a credible long-term threat once it expands beyond three metros.",
+    sourceId: "et-amazon-now-relaunch",
+  },
+  {
+    id: "jiomart-express",
+    name: "JioMart Express",
+    category: "India quick commerce",
+    marketShare: 2,
+    growth: 35,
+    sentiment: 65,
+    engagement: 57,
+    revenueInrCr: null,
+    cities: 40,
+    stores: null,
+    pricing: "Reliance Retail integrated, profitability-first",
+    moat: "Reliance Retail store network, kirana partnerships, JioMart supply chain",
+    fastestChannel: "Jio ecosystem and Reliance Retail footfall conversion",
+    risk: "Low",
+    insight:
+      "JioMart Express trades speed-led marketing for supply-chain depth and profitability, making it a slow-burn but structurally durable competitor.",
+    sourceId: "moneycontrol-reliance-qcommerce",
+  },
 ];
 
 const trends = [
@@ -127,6 +220,9 @@ const trends = [
   { id: "apr-2025", period: "Apr", quickCommerce: 78, premiumProducts: 59, festiveDemand: 51, loyalty: 61 },
   { id: "may-2025", period: "May", quickCommerce: 84, premiumProducts: 66, festiveDemand: 58, loyalty: 68 },
   { id: "jun-2025", period: "Jun", quickCommerce: 90, premiumProducts: 73, festiveDemand: 65, loyalty: 74 },
+  { id: "jul-2025", period: "Jul", quickCommerce: 94, premiumProducts: 78, festiveDemand: 71, loyalty: 79 },
+  { id: "aug-2025", period: "Aug", quickCommerce: 97, premiumProducts: 82, festiveDemand: 80, loyalty: 83 },
+  { id: "sep-2025", period: "Sep", quickCommerce: 100, premiumProducts: 86, festiveDemand: 91, loyalty: 88 },
 ];
 
 const campaigns = [
@@ -166,6 +262,30 @@ const campaigns = [
       "Instamart uses Swiggy's food-delivery base and membership layer to increase frequency while expanding beyond urgent grocery top-ups.",
     sourceId: "swiggy-q4-fy25",
   },
+  {
+    id: "flipkart-minutes-bbd",
+    brand: "Flipkart Minutes",
+    name: "Marketplace-to-minutes funnel",
+    channel: "Flipkart app cross-sell + Big Billion Days",
+    lift: "300+ dark stores in under 12 months",
+    spend: "Walmart-backed expansion capital",
+    pattern: "Convert existing marketplace shoppers, ride mega-event traffic, expand dark stores fast",
+    whyItWorked:
+      "Flipkart Minutes seeds quick-commerce trial by surfacing 10-minute delivery to a 500M-user marketplace base during high-intent shopping events.",
+    sourceId: "et-flipkart-minutes-expansion",
+  },
+  {
+    id: "amazon-now-prime",
+    brand: "Amazon Now",
+    name: "Prime-bundled instant delivery",
+    channel: "Prime cross-sell + Amazon app",
+    lift: "3-metro pilot, fast follow expected",
+    spend: "Deep-capital subsidized",
+    pattern: "Bundle speed into Prime, retarget existing Amazon shoppers, subsidize early trial",
+    whyItWorked:
+      "Amazon leans on Prime loyalty and shopper data to make 10-minute delivery a retention lever rather than a standalone acquisition play.",
+    sourceId: "et-amazon-now-relaunch",
+  },
 ];
 
 const recommendations = [
@@ -204,6 +324,24 @@ const recommendations = [
     motion: "Retention",
     action:
       "Create city-level dashboards for AOV, delivery cost, repeat rate, fill rate, and promotion leakage before scaling discounts.",
+  },
+  {
+    id: "entrant-preempt",
+    title: "Pre-empt deep-pocketed entrants",
+    impact: 88,
+    confidence: 80,
+    motion: "Strategy",
+    action:
+      "Lock high-density catchments and exclusive supply before Flipkart Minutes, Amazon Now, and JioMart scale; defend with loyalty switching costs.",
+  },
+  {
+    id: "festive-surge",
+    title: "Win the festive demand surge",
+    impact: 90,
+    confidence: 85,
+    motion: "Marketing",
+    action:
+      "Stack premium-gifting SKUs, bank/UPI offers, and creator pushes for the Aug-Oct festive ramp where demand and basket size peak hardest.",
   },
 ];
 

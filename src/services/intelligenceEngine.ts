@@ -15,12 +15,24 @@ export function generateMarketBrief(
 ): MarketBrief {
   const competitors = dataset.competitors;
   const fastest = [...competitors].sort((a, b) => b.growth - a.growth)[0];
+  const leader = [...competitors].sort((a, b) => b.marketShare - a.marketShare)[0];
   const highestEngagement = [...competitors].sort((a, b) => b.engagement - a.engagement)[0];
   const topCampaign = dataset.campaigns[0];
   const latestTrend = dataset.trends[dataset.trends.length - 1];
   const previousTrend = dataset.trends[dataset.trends.length - 2];
   const quickCommerceAcceleration =
     latestTrend && previousTrend ? latestTrend.quickCommerce - previousTrend.quickCommerce : 0;
+
+  // Derive threat level from the fastest rival's growth and the leader's concentration.
+  const maxGrowth = fastest?.growth ?? 0;
+  const leaderShare = leader?.marketShare ?? 0;
+  const threatLevel: MarketBrief["threatLevel"] =
+    maxGrowth >= 80 || leaderShare >= 40 ? "High" : maxGrowth >= 30 || leaderShare >= 20 ? "Medium" : "Low";
+
+  const summary =
+    fastest && leader
+      ? `${market} is a race for density, loyalty, and unit economics. ${leader.name} leads on share (${leader.marketShare}%) while ${fastest.name} is growing fastest at ${fastest.growth}%. Winning means defending frequency while protecting contribution margin.`
+      : `${market} intelligence is still loading — add competitors and run a live market scan to generate a data-backed thesis.`;
 
   const growthExplanation: string[] = [];
   if (fastest) {
@@ -43,9 +55,8 @@ export function generateMarketBrief(
   return {
     market,
     generatedAt: new Date().toISOString(),
-    threatLevel: "High",
-    summary:
-      "India quick commerce is a density, loyalty, and unit-economics race. Blinkit leads on ecosystem leverage, Zepto is buying speed-led youth mindshare, and Instamart is scaling reach through Swiggy's membership base.",
+    threatLevel,
+    summary,
     growthExplanation,
     recommendedNextSteps: dataset.recommendations.slice(0, 3).map((recommendation) => recommendation.action),
   };
