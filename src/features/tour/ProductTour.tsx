@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useLayoutEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ArrowLeft, ArrowRight, Sparkles, X } from "lucide-react";
 
 export const TOUR_STORAGE_KEY = "vaniq_tour_done";
@@ -47,6 +47,8 @@ type Props = {
 export function ProductTour({ onClose }: Props) {
   const [index, setIndex] = useState(0);
   const [rect, setRect] = useState<DOMRect | null>(null);
+  const tooltipRef = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ top: number; left: number }>({ top: -9999, left: -9999 });
 
   const step = STEPS[index];
   const isLast = index === STEPS.length - 1;
@@ -108,21 +110,33 @@ export function ProductTour({ onClose }: Props) {
   const next = () => (isLast ? finish() : setIndex((i) => i + 1));
   const back = () => setIndex((i) => Math.max(i - 1, 0));
 
-  // Position the tooltip: below the target if room, otherwise above, else centered.
-  const tooltipStyle: React.CSSProperties = (() => {
+  // Position the tooltip so the WHOLE card always stays inside the viewport.
+  // Measures the card's real height, prefers below the target, then above,
+  // then clamps — never pushing the card off the top or bottom edge.
+  useLayoutEffect(() => {
+    const margin = 16;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+    const cardH = tooltipRef.current?.offsetHeight ?? 220;
+
     if (!rect) {
-      return { top: "50%", left: "50%", transform: "translate(-50%, -50%)" };
+      setPos({
+        top: Math.max(margin, (vh - cardH) / 2),
+        left: Math.max(margin, (vw - TOOLTIP_WIDTH) / 2),
+      });
+      return;
     }
-    const spaceBelow = window.innerHeight - rect.bottom;
-    const left = Math.min(
-      Math.max(rect.left, 16),
-      window.innerWidth - TOOLTIP_WIDTH - 16,
-    );
-    if (spaceBelow > 220) {
-      return { top: rect.bottom + 14, left };
-    }
-    return { top: Math.max(rect.top - 14, 16), left, transform: "translateY(-100%)" };
-  })();
+
+    const left = Math.min(Math.max(rect.left, margin), vw - TOOLTIP_WIDTH - margin);
+    const below = rect.bottom + 14;
+    const above = rect.top - 14 - cardH;
+    let top: number;
+    if (below + cardH <= vh - margin) top = below;
+    else if (above >= margin) top = above;
+    else top = Math.max(margin, vh - cardH - margin);
+
+    setPos({ top, left });
+  }, [rect, index, step.title]);
 
   return (
     <div className="tour-overlay" role="dialog" aria-modal="true" aria-label="Product tour">
@@ -140,7 +154,7 @@ export function ProductTour({ onClose }: Props) {
         <div className="tour-scrim" />
       )}
 
-      <div className="tour-tooltip" style={{ width: TOOLTIP_WIDTH, ...tooltipStyle }}>
+      <div ref={tooltipRef} className="tour-tooltip" style={{ width: TOOLTIP_WIDTH, top: pos.top, left: pos.left }}>
         <div className="tour-tooltip-head">
           <span className="tour-badge">
             <Sparkles size={13} /> Tour · {index + 1}/{STEPS.length}
